@@ -1,0 +1,22 @@
+.nav {
+    grid-area: n;
+    background: green;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.item {
+    color: white;
+    text-decoration: none;
+}
+
+.item.active {
+    color: gold;
+}
+
+.bro {
+    margin-top: 20px;
+    display: flex;
+    gap: 5px;
+}
