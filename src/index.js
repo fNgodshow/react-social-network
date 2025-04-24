@@ -4,22 +4,19 @@ import store from "./redux/redux-store";
 import ReactDOM from "react-dom/client";
 import React from "react";
 import App from "./App";
+import {Provider} from "react-redux";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-let rerenderEntireThree = (state) => {
     root.render(
         <React.StrictMode>
-            <App state={state}
-                 dispatch={store.dispatch.bind(store)} store={store}/>
+            <Provider store={store}>
+                <App />
+            </Provider>
         </React.StrictMode>
     );
-}
 
-rerenderEntireThree(store.getState());
-store.subscribe( () => {
-    let state = store.getState();
-    rerenderEntireThree(state);
-} );
+
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
