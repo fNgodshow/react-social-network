@@ -2,8 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import { useParams } from "react-router-dom";
 import Profile from "./Profile";
-import { setUserProfile } from "../../redux/profile-reducer";
+import {getUsersProfile, setUserProfile} from "../../redux/profile-reducer";
 import {usersAPI} from "../../api/api";
+import {withAuthRedirect} from "../../hoc/withAuthRedirect";
+import {compose} from "redux";
 
 // HOC для передачи параметров URL в классовый компонент
 function withRouter(Component) {
@@ -19,9 +21,7 @@ class ProfileContainer extends React.Component {
         if(!profileId) {
             profileId = 2;
         }
-            usersAPI.getUsersProfile(profileId).then(data => {
-                this.props.setUserProfile(data);
-            });
+            this.props.getUsersProfile(profileId)
     }
 
     render() {
@@ -38,5 +38,8 @@ const mapStateToProps = (state) => ({
     profile: state.profilePage.profile,
 });
 
-// Экспорт с HOC и подключением Redux
-export default connect(mapStateToProps, { setUserProfile })(withRouter(ProfileContainer));
+export default compose(
+    connect(mapStateToProps, { setUserProfile, getUsersProfile }),
+    withRouter
+)(ProfileContainer)
+

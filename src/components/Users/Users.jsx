@@ -3,6 +3,7 @@ import userPhoto from "../../assets/images/userImage.webp";
 import React from "react";
 import {NavLink} from "react-router-dom";
 import {usersAPI} from "../../api/api";
+import {followThunk, toggleIsFollowing, unfollowThunk} from "../../redux/users-reducer";
 
 let Users = (props) => {
 
@@ -32,19 +33,11 @@ let Users = (props) => {
                     </NavLink>
                     <div>
                         {u.followed
-                            ? <button onClick={() => {
-                                usersAPI.unfollowUsers(u.id).then(data => {
-                                    if (data.resultCode == 0) {
-                                        props.unfollow(u.id);
-                                    }
-                                });
+                            ? <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
+                                props.unfollowThunk(u.id)
                             }}>unfollow</button>
-                            : <button onClick={() => {
-                                usersAPI.followUsers(u.id).then(data => {
-                                    if (data.resultCode == 0) {
-                                        props.follow(u.id);
-                                    }
-                                });
+                            : <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
+                                props.followThunk(u.id)
                             }}>follow</button>}
                     </div>
                 </span>
