@@ -1,7 +1,7 @@
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
 import UsersContainer from "./components/Users/UsersContainer";
-import {BrowserRouter, Route, Routes, useParams} from "react-router-dom";
+import {HashRouter, Route, Routes, useParams} from "react-router-dom";
 import HeaderContainer from "./components/Header/HeaderContainer";
 import Login from "./components/Login/Login";
 import React, {Component, lazy} from "react";
@@ -38,34 +38,22 @@ class App extends Component {
         }
 
         return (
-            <BrowserRouter>
+            <HashRouter basename={process.env.PUBLIC_URL}>
                 <div className='app-wrapper'>
                     <HeaderContainer/>
                     <Navbar/>
                     <div className='app-wrapper-content'>
                         <Routes>
-                            <Route
-                                path='/profile'
-                                element={<SuspendedProfile />}
-                            />
-                            <Route
-                                path='/profile/:profileId'
-                                element={<SuspendedProfile />}
-                            />
-                            <Route
-                                path='/dialogs'
-                                element={<SuspendedDialogs />}
-                            />
-                            <Route
-                                path='/dialogs/:id'
-                                element={<SuspendedDialogs />}
-                            />
+                            <Route path='/profile' element={<SuspendedProfile />}/>
+                            <Route path='/profile/:profileId' element={<SuspendedProfile />}/>
+                            <Route path='/dialogs' element={<SuspendedDialogs />}/>
+                            <Route path='/dialogs/:id' element={<SuspendedDialogs />}/>
                             <Route path='/users' element={<UsersContainer />} />
                             <Route path='/login' element={<Login />} />
                         </Routes>
                     </div>
                 </div>
-            </BrowserRouter>
+            </HashRouter>
         );
     }
 }
