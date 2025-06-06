@@ -11,7 +11,7 @@ const dialogsReducer = (state = initialState, action) => {
             let newTextBody = action.newMessageElement;
             return {
                 ...state,
-                messages: [...state.messages, { id: 4, message: newTextBody }],
+                messages: [...state.messages, { id: Math.random(), message: newTextBody }],
             };
         default:
             return state;

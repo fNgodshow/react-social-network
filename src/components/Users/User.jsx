@@ -3,7 +3,7 @@ import React from "react";
 import {NavLink} from "react-router-dom";
 
 let Users = (props) => {
-
+    console.log(props)
     let u = props.user;
 
     return (
@@ -12,24 +12,22 @@ let Users = (props) => {
                     <NavLink to={`/profile/${u.id}`}>
                         <img src={u.photos.small != null ? u.photos.small : userPhoto} alt=""/>
                     </NavLink>
-                    <div>
-                        {u.followed
-                            ? <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
-                                props.unfollowThunk(u.id)
-                            }}>unfollow</button>
-                            : <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
-                                props.followThunk(u.id)
-                            }}>follow</button>}
-                    </div>
+                    {props.isAuth &&
+                        <div>
+                            {u.followed
+                                ? <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
+                                    props.unfollowThunk(u.id)
+                                }}>unfollow</button>
+                                : <button disabled={props.followingInProgress.some(id => id === u.id)} onClick={() => {
+                                    props.followThunk(u.id)
+                                }}>follow</button>}
+                        </div>
+                    }
                 </span>
                 <span>
                     <span>
                         <div>{u.name}</div>
                         <div>{u.status}</div>
-                    </span>
-                    <span>
-                        <div>{"u.location.country"}</div>
-                        <div>{"u.location.city"}</div>
                     </span>
                 </span>
             </div>

@@ -1,55 +1,89 @@
-import {Field, reduxForm} from "redux-form";
-import {login} from "../../redux/auth-reducer";
-import {connect} from "react-redux";
-import {required} from "../../utils/validators/validators";
-import {createField, Input} from "../common/FormControls/FormControls";
-import {Navigate} from "react-router-dom";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Navigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../redux/auth-reducer";
 
+const AddMessageForm = ({ captchaUrl, onSubmit }) => {
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors }
+    } = useForm();
 
-const LoginForm = ({error, captchaUrl, ...props}) => {
-    return <form onSubmit={props.handleSubmit} action="">
-        {createField(`Email`, 'email', [required], Input)}
-        {createField(`Password`, 'password', [required], Input, {type: 'password'})}
-        {createField(null, 'rememberMe', [], Input, {type: 'checkbox'}, 'remember me')}
+    const onSubmitHandler = (data) => {
+        onSubmit(data);
+        reset();
+    };
 
-        { captchaUrl &&
-            <img src={captchaUrl} alt=""/>
-        }
-        { captchaUrl &&
-            createField(`Symbol from image`, 'captcha', [required], Input)
-        }
-
-        {error &&
+    return (
+        <form onSubmit={handleSubmit(onSubmitHandler)}>
             <div>
-                {error}
+                <input
+                    placeholder="Email"
+                    type="email"
+                    {...register("email", { required: "Email обязателен" })}
+                />
+                {errors.email && <span style={{ color: "red" }}>{errors.email.message}</span>}
             </div>
-        }
-        <div>
-            <button>Sign in</button>
-        </div>
-    </form>
-}
-
-const LoginReduxForm = reduxForm({form: 'login'})(LoginForm)
-
-const Login = (props) => {
-    const onSubmit = (formData) => {
-        props.login(formData.email, formData.password, formData.rememberMe, formData.captcha);
-    }
-
-    if (props.isAuth) {
-        return <Navigate to={'/profile'} />
-    }
-
-    return <div>
-        <h1>LOGIN</h1>
-        <LoginReduxForm captchaUrl={props.captchaUrl} onSubmit={onSubmit} />
-    </div>
+            <div>
+                <input
+                    placeholder="Password"
+                    type="password"
+                    {...register("password", { required: "Password обязателен" })}
+                />
+                {errors.password && <span style={{ color: "red" }}>{errors.password.message}</span>}
+            </div>
+            <div>
+                <input type="checkbox" {...register("rememberMe")} />
+                <span>Remember me</span>
+            </div>
+            {captchaUrl && (
+                <>
+                    <div>
+                        <img src={captchaUrl} alt="Captcha" />
+                    </div>
+                    <div>
+                        <input
+                            placeholder="Symbol from image"
+                            {...register("captcha", { required: "Введите символ с картинки" })}
+                        />
+                        {errors.captcha && <span style={{ color: "red" }}>{errors.captcha.message}</span>}
+                    </div>
+                </>
+            )}
+            <div>
+                <input value="Sign in" type="submit" />
+            </div>
+        </form>
+    );
 };
 
-const mapStateToProps = (state) => ({
-    isAuth: state.auth.isAuth,
-    captchaUrl: state.auth.captchaUrl
-})
+const Login = () => {
+    const isAuth = useSelector(state => state.auth.isAuth);
+    const captchaUrl = useSelector(state => state.auth.captchaUrl);
+    const dispatch = useDispatch();
 
-export default connect(mapStateToProps, {login})(Login);
+    const onSubmit = (formData) => {
+        dispatch(login(
+            formData.email,
+            formData.password,
+            formData.rememberMe,
+            formData.captcha
+        ));
+    };
+
+    if (isAuth) {
+        return <Navigate to="/profile" />;
+    }
+
+    return (
+        <div>
+            <h1>LOGIN</h1>
+            <AddMessageForm captchaUrl={captchaUrl} onSubmit={onSubmit} />
+        </div>
+    );
+};
+
+export default Login;

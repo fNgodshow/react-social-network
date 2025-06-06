@@ -1,46 +1,50 @@
-import {createField, Input, Textarea} from "../../common/FormControls/FormControls";
-import {reduxForm} from "redux-form";
-import {Contact} from "./ProfileInfo";
+import React, {useEffect, useState} from "react";
+import { useForm } from "react-hook-form";
 
-const ProfileDataForm = ({handleSubmit, profile, error}) => {
+const ProfileDataFormRedux = ({ profile, ...props }) => {
+    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+        defaultValues: profile,
+    });
 
-    return <form onSubmit={handleSubmit} action="">
-        <div>Full name</div>
-        {
-            createField('Full name', 'fullName', [], Input)
+    useEffect(() => {
+        if (profile) {
+            reset(profile);
         }
-        <div>lookingForAJob</div>
-        {
-            createField('', 'lookingForAJob', [], Input, {type: 'checkbox'})
-        }
-        <div>My professional skills</div>
-        {
-            createField('My professional skills', 'lookingForAJobDescription', [], Textarea)
-        }
-        <div>About Me</div>
-        {
-            createField('AboutMe', 'aboutMe', [], Textarea)
-        }
-        <div>Contacts:</div>
-        {
-            Object.keys(profile.contacts).map(key => {
-                return <div>
-                    <div>{key}:</div>
-                    {
-                        createField(`${key}`, `contacts.${key}`, [], Input)
-                    }
-                </div>
-            })
-        }
-        {error &&
+    }, [profile, reset]);
+
+    const onSubmitHandler = (data) => {
+        props.onSubmit(data);
+    };
+
+    return (
+        <form onSubmit={handleSubmit(onSubmitHandler)}>
             <div>
-                {error}
+                <input placeholder="Full name" {...register("fullName")} />
             </div>
-        }
-        <button>Save</button>
-    </form>
-}
-
-const ProfileDataFormRedux = reduxForm({form: 'edit-profile', enableReinitialize: true})(ProfileDataForm)
+            <div>
+                <input type="checkbox" {...register("lookingForAJob")} />
+            </div>
+            <div>
+        <textarea
+            placeholder="My professional skills"
+            {...register("lookingForAJobDescription")}
+        />
+            </div>
+            <div>
+                <textarea placeholder="About Me" {...register("aboutMe")} />
+            </div>
+            {profile.contacts &&
+                Object.keys(profile.contacts).map((key, index) => (
+                    <div key={index}>
+                        <div>{key}:</div>
+                        <input placeholder={key} {...register(`contacts.${key}`)} />
+                    </div>
+                ))}
+            <div>
+                <input type="submit" value="Сохранить" />
+            </div>
+        </form>
+    );
+};
 
 export default ProfileDataFormRedux;

@@ -1,66 +1,54 @@
-import React from "react";
-import {connect} from "react-redux";
-import {useParams} from "react-router-dom";
+import React, { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Profile from "./Profile";
-import {getUsersProfile, getUsersStatus, saveProfile, savePhoto, setUserProfile, updateStatus} from "../../redux/profile-reducer";
-import {compose} from "redux";
+import {
+    getUsersProfile,
+    getUsersStatus,
+    saveProfile,
+    savePhoto,
+    setUserProfile,
+    updateStatus
+} from "../../redux/profile-reducer";
 
-// HOC для передачи параметров URL в классовый компонент
-function withRouter(Component) {
-    return function Wrapper(props) {
-        const params = useParams();
-        return <Component {...props} params={params}/>;
+const ProfileContainer = () => {
+    const { profileId } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const profile = useSelector((state) => state.profilePage.profile);
+    const status = useSelector((state) => state.profilePage.status);
+    const authorizedUserId = useSelector((state) => state.auth.id);
+    const isAuth = useSelector((state) => state.auth.isAuth);
+
+    const refreshProfile = () => {
+        let id = profileId;
+        if (!id) {
+            id = authorizedUserId;
+            if (!id) {
+              navigate('/login');
+            }
+        }
+        dispatch(getUsersProfile(id));
+        dispatch(getUsersStatus(id));
     };
-}
 
-class ProfileContainer extends React.Component {
+    useEffect(() => {
+        refreshProfile();
+    }, [profileId, authorizedUserId, dispatch, profile]);
 
-    refreshProfile() {
-        let profileId = this.props.params.profileId;
-        if (!profileId) {
-            profileId = this.props.authorizedUserId;
-            // if(!profileId) {
-            //     this.props.history.push('/login')
-            // }
-        }
-        this.props.getUsersProfile(profileId)
-        this.props.getUsersStatus(profileId)
-    }
+    return (
+        <div>
+            <Profile
+                isOwner={!profileId}
+                profile={profile}
+                status={status}
+                updateStatus={(status) => dispatch(updateStatus(status))}
+                savePhoto={(photoFile) => dispatch(savePhoto(photoFile))}
+                saveProfile={(profileData) => dispatch(saveProfile(profileData))}
+            />
+        </div>
+    );
+};
 
-    componentDidMount() {
-        this.refreshProfile()
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.params.profileId != prevProps.params.profileId) {
-            this.refreshProfile()
-        }
-    }
-
-    render() {
-        return (
-            <div>
-                <Profile {...this.props}
-                         isOwner={!this.props.params.profileId}
-                         profile={this.props.profile}
-                         status={this.props.status}
-                         updateStatus={this.props.updateStatus}
-                         savePhoto={this.props.savePhoto}/>
-            </div>
-        );
-    }
-}
-
-// Получение данных из Redux Store
-const mapStateToProps = (state) => ({
-    profile: state.profilePage.profile,
-    status: state.profilePage.status,
-    authorizedUserId: state.auth.id,
-    isAuth: state.auth.isAuth,
-});
-
-export default compose(
-    connect(mapStateToProps, {setUserProfile, getUsersProfile, getUsersStatus, updateStatus, savePhoto, saveProfile}),
-    withRouter
-)(ProfileContainer)
-
+export default ProfileContainer;

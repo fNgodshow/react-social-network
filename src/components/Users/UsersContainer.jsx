@@ -1,86 +1,62 @@
-import {connect} from "react-redux";
-import {
-    follow,
-    followThunk,
-    requestUsers,
-    setCurrentPage,
-    setTotalUsersCount,
-    setUsers,
-    toggleIsFetching,
-    toggleIsFollowing,
-    unfollow,
-    unfollowThunk
-} from "../../redux/users-reducer";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Users from "./Users";
 import Preloader from "../common/preloader/Preloader";
-import {compose} from "redux";
 import {
-    getCurrentPage,
-    getFollowingInProgress,
-    getIsFetching,
+    follow,
+    unfollow,
+    followThunk,
+    unfollowThunk,
+    requestUsers,
+    toggleIsFollowing
+} from "../../redux/users-reducer";
+import {
+    getUsers,
     getPageSize,
     getTotalUsersCount,
-    getUsers
+    getCurrentPage,
+    getIsFetching,
+    getFollowingInProgress
 } from "../../redux/users-selectors";
 
-class UsersContainer extends React.Component {
+const UsersContainer = () => {
+    const dispatch = useDispatch();
 
-    componentDidMount() {
-        const {currentPage, pageSize} = this.props;
-        this.props.getUsersThunk(currentPage, pageSize)
-    }
+    const users = useSelector(getUsers);
+    const pageSize = useSelector(getPageSize);
+    const totalUsersCount = useSelector(getTotalUsersCount);
+    const currentPage = useSelector(getCurrentPage);
+    const isFetching = useSelector(getIsFetching);
+    const followingInProgress = useSelector(getFollowingInProgress);
+    const isAuth = useSelector((state) => state.auth.isAuth);
 
-    onPageChanged = (pageNumber) => {
-        const {pageSize} = this.props;
+    useEffect(() => {
+        dispatch(requestUsers(currentPage, pageSize));
+    }, [dispatch, currentPage, pageSize]);
 
-        this.props.getUsersThunk(pageNumber, pageSize)
-    }
+    const onPageChanged = (pageNumber) => {
+        dispatch(requestUsers(pageNumber, pageSize));
+    };
 
-    render() {
-
-        return <>
-            {
-                this.props.isFetching ? <Preloader/> : null
-            }
-            <Users totalUsersCount={this.props.totalUsersCount}
-                   pageSize={this.props.pageSize}
-                   currentPage={this.props.currentPage}
-                   onPageChanged={this.onPageChanged}
-                   users={this.props.users}
-                   follow={this.props.follow}
-                   unfollow={this.props.unfollow}
-                   followingInProgress={this.props.followingInProgress}
-                   toggleIsFollowing={this.props.toggleIsFollowing}
-                   followThunk={this.props.followThunk}
-                   unfollowThunk={this.props.unfollowThunk}
+    return (
+        <>
+            {isFetching && <Preloader />}
+            <Users
+                totalUsersCount={totalUsersCount}
+                pageSize={pageSize}
+                currentPage={currentPage}
+                onPageChanged={onPageChanged}
+                users={users}
+                isAuth={isAuth}
+                follow={() => dispatch(follow())}
+                unfollow={() => dispatch(unfollow())}
+                followingInProgress={followingInProgress}
+                toggleIsFollowing={(id, isFollowing) => dispatch(toggleIsFollowing(id, isFollowing))}
+                followThunk={(userId) => dispatch(followThunk(userId))}
+                unfollowThunk={(userId) => dispatch(unfollowThunk(userId))}
             />
         </>
-    }
-}
+    );
+};
 
-let mapStateToProps = (state) => {
-    return {
-        users: getUsers(state),
-        pageSize: getPageSize(state),
-        totalUsersCount: getTotalUsersCount(state),
-        currentPage: getCurrentPage(state),
-        isFetching: getIsFetching(state),
-        followingInProgress: getFollowingInProgress(state)
-    }
-}
-
-export default compose(
-    connect(mapStateToProps, {
-        follow,
-        unfollow,
-        setUsers,
-        setCurrentPage,
-        setTotalUsersCount,
-        toggleIsFetching,
-        toggleIsFollowing,
-        getUsersThunk: requestUsers,
-        followThunk,
-        unfollowThunk,
-    })
-)(UsersContainer)
+export default UsersContainer;

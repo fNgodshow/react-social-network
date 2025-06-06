@@ -1,3 +1,20 @@
 .descriptionBlock {
     padding: 10px;
+    display: flex;
+    gap: 50px;
+}
+
+.userPhoto {
+    border-radius: 5%;
+    width: 200px;
+    height: 250px;
+}
+
+.profileStatus {
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.contacts {
+    padding-left: 10px;
 }
